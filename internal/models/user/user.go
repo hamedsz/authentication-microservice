@@ -1,7 +1,7 @@
 package user
 
 import (
-	"auth_micro/helpers"
+	"auth_micro/helpers/database"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -58,7 +58,7 @@ func initial(data map[string]interface{}) *Model {
 
 func Find(query interface{}) (*Model, error) {
 	var result gin.H
-	err := helpers.Database.Collection("users").FindOne(helpers.Ctx , query).Decode(&result)
+	err := database.Database.Collection("users").FindOne(database.Ctx, query).Decode(&result)
 
 	if err != nil{
 		return nil , err
@@ -78,7 +78,7 @@ func (model *Model) Save()  (error){
 }
 
 func saveNewUser(model *Model) (error){
-	result , err := helpers.Database.Collection("users").InsertOne(helpers.Ctx , model)
+	result , err := database.Database.Collection("users").InsertOne(database.Ctx, model)
 	if err != nil {
 		return err
 	}
@@ -96,8 +96,8 @@ func updateUser(model *Model) (error){
 		return err
 	}
 
-	_, err = helpers.Database.Collection("users").UpdateOne(
-		helpers.Ctx,
+	_, err = database.Database.Collection("users").UpdateOne(
+		database.Ctx,
 		bson.M{"_id": objID},
 		bson.D{
 			{
