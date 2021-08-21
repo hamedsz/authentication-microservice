@@ -1,6 +1,7 @@
-package helpers
+package database
 
 import (
+	"auth_micro/helpers/env"
 	"context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,7 +19,7 @@ func getDatabase() (*mongo.Database , context.Context){
 		NewClient(
 			options.Client().
 				ApplyURI(
-					GetEnv("MONGO_URL")))
+					env.GetEnv("MONGO_URL")))
 
 	if err != nil {
 		log.Fatal(err)
@@ -34,5 +35,5 @@ func getDatabase() (*mongo.Database , context.Context){
 		log.Fatal(err)
 	}
 
-	return client.Database(GetEnv("MONGO_DB")) , ctx
+	return client.Database(env.GetEnv("MONGO_DB")) , ctx
 }
