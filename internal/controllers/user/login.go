@@ -18,7 +18,7 @@ type loginResponse struct {
 	User  interface{}
 }
 
-func Login(c *gin.Context)  {
+func (controller Controller) Login(c *gin.Context)  {
 	var json loginRequest
 	err := c.ShouldBind(&json)
 	if err != nil {

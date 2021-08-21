@@ -8,9 +8,12 @@ import (
 
 func SetRoutes(r *gin.Engine)  {
 	api := r.Group("/api")
+
 	apiV1 := api.Group("/v1")
 
-	apiV1.POST("/users/login", user.Login)
-	apiV1.POST("/users/signup", user.SignUp)
-	apiV1.POST("/users/verify", user.Verify)
+	c := user.NewUserController()
+
+	apiV1.POST("/users/login", c.Login)
+	apiV1.POST("/users/signup", c.Signup)
+	apiV1.POST("/users/verify", c.Verify)
 }

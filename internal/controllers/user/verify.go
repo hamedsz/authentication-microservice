@@ -11,7 +11,7 @@ type verifyResponse struct {
 	User  interface{}
 }
 
-func Verify(c *gin.Context)  {
+func (controller Controller) Verify(c *gin.Context)  {
 	climbs := auth.AuthorizeJWT(c)
 	if climbs == nil {
 		return
