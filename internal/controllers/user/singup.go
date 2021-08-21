@@ -2,6 +2,8 @@ package user
 
 import (
 	"auth_micro/helpers/auth"
+	"auth_micro/helpers/handler"
+	"auth_micro/helpers/handler/errors"
 	"auth_micro/internal/models/user"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -27,14 +29,14 @@ func (controller Controller) Signup(c *gin.Context)  {
 	err := c.ShouldBind(&json)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		handler.ValidationErrorHandler(c , err)
 		return
 	}
 
 	hashedPassword , err := bcrypt.GenerateFromPassword([]byte(fmt.Sprint("" , json.Password)) , 0)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		handler.ErrorHandler(c , err, errors.INTERNAL_SERVER_ERROR)
 		return
 	}
 
@@ -52,7 +54,7 @@ func (controller Controller) Signup(c *gin.Context)  {
 	err = model.Save()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		handler.ErrorHandler(c , err , errors.INTERNAL_SERVER_ERROR)
 		return
 	}
 

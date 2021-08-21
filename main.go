@@ -7,6 +7,7 @@ import (
 )
 
 func main()  {
+
 	r := gin.Default()
 	validations.Register()
 	routes.SetRoutes(r)

@@ -2,6 +2,8 @@ package user
 
 import (
 	"auth_micro/helpers/auth"
+	"auth_micro/helpers/handler"
+	"auth_micro/helpers/handler/errors"
 	"auth_micro/internal/models/user"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -22,7 +24,7 @@ func (controller Controller) Login(c *gin.Context)  {
 	var json loginRequest
 	err := c.ShouldBind(&json)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		handler.ValidationErrorHandler(c , err)
 		return
 	}
 
@@ -31,14 +33,14 @@ func (controller Controller) Login(c *gin.Context)  {
 	})
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		handler.ErrorHandler(c , err , errors.WRONG_LOGIN_INFO)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password) , []byte(json.Password))
 
 	if err != nil{
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		handler.ErrorHandler(c , err , errors.WRONG_LOGIN_INFO)
 		return
 	}
 
