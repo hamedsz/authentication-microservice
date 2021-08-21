@@ -22,7 +22,7 @@ type signupResponse struct {
 	User  interface{}
 }
 
-func SignUp(c *gin.Context)  {
+func (controller Controller) Signup(c *gin.Context)  {
 	var json signupRequest
 	err := c.ShouldBind(&json)
 
