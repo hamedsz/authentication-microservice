@@ -8,8 +8,13 @@ import (
 )
 
 func ValidationErrorHandler(c *gin.Context , err error ) {
-	validatorErrs := err.(validator.ValidationErrors)
+	validatorErrs , ok := err.(validator.ValidationErrors)
+
 	var errorMessages []string
+
+	if !ok {
+		errorMessages = append(errorMessages , "validation failed")
+	}
 
 	for _, e := range validatorErrs {
 
@@ -39,4 +44,5 @@ func ValidationErrorHandler(c *gin.Context , err error ) {
 
 var errorsMap = map[string]string{
 	"required": ":field is required.",
+	"unique_email": ":field must be unique.",
 }

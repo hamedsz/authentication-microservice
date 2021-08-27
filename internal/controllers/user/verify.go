@@ -1,19 +1,45 @@
 package user
 
 import (
-	"auth_micro/helpers/auth"
 	user "auth_micro/internal/models/user"
+	"auth_micro/internal/services/auth"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type verifyResponse struct {
-	User  interface{}
+	User  user.Model `json:"user"`
+}
+
+func getToken(c *gin.Context) (*string , error){
+
+	const BEARER_SCHEMA = "Bearer "
+	authHeader := c.GetHeader("Authorization")
+
+	if len(BEARER_SCHEMA) > len(authHeader){
+//		c.AbortWithStatus(http.StatusUnauthorized)
+		return nil , errors.New("wrong header!")
+	}
+
+	token := authHeader[len(BEARER_SCHEMA):]
+
+	return &token , nil
 }
 
 func (controller Controller) Verify(c *gin.Context)  {
-	climbs := auth.AuthorizeJWT(c)
-	if climbs == nil {
+
+	token , err := getToken(c)
+
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	climbs , err := auth.GetAdabter().Authorize(*token)
+
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
@@ -27,6 +53,6 @@ func (controller Controller) Verify(c *gin.Context)  {
 	}
 
 	c.JSON(http.StatusOK , verifyResponse{
-		User: result.ToJson(),
+		User: result,
 	})
 }

@@ -1,10 +1,8 @@
-package auth
+package jwt
 
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"net/http"
 	"os"
 	"time"
 )
@@ -71,27 +69,4 @@ func (service *jwtServices) ValidateToken(encodedToken string) (*jwt.Token, erro
 		return []byte(service.secretKey), nil
 	})
 
-}
-
-
-func AuthorizeJWT(c *gin.Context) jwt.MapClaims{
-	const BEARER_SCHEMA = "Bearer "
-	authHeader := c.GetHeader("Authorization")
-
-	if len(BEARER_SCHEMA) > len(authHeader){
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return nil
-	}
-
-	tokenString := authHeader[len(BEARER_SCHEMA):]
-	token, err := JWTAuthService().ValidateToken(tokenString)
-	if token.Valid {
-		claims := token.Claims.(jwt.MapClaims)
-		return claims
-	} else {
-		fmt.Println(err)
-		c.AbortWithStatus(http.StatusUnauthorized)
-	}
-
-	return nil
 }
