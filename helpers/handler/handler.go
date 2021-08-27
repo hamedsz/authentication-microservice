@@ -7,12 +7,12 @@ import (
 )
 
 type ErrorResponse struct{
-	Errors []string
+	Errors []string `json:"errors"`
 }
 
 type DebugErrorResponse struct{
-	Errors []string
-	DebugErrorMessage string
+	Errors []string `json:"errors"`
+	DebugErrorMessage string `json:"debug_error_message"`
 }
 
 func ErrorHandler(c *gin.Context , err error , message string)  {

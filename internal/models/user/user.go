@@ -1,74 +1,35 @@
 package user
 
 import (
-	"auth_micro/helpers/database"
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	config "auth_micro/config/database"
+	database "auth_micro/internal/services/database"
+	"time"
 )
 
 type Model struct {
-	Id       *string
-	FirstName string
-	LastName  string
-	Role      string
-	Email     string
-	Password  string
+	Id        string    `bson:"_id,omitempty"        json:"id"`
+	FirstName string    `bson:"first_name" json:"first_name"`
+	LastName  string    `bson:"last_name"  json:"last_name"`
+	Role      string    `bson:"role"       json:"role"`
+	Email     string    `bson:"email"      json:"email"`
+	Password  string    `bson:"password"   json:"-"`
 
-	UpdatedAt interface{}
-	CreatedAt interface{}
+	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
+	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 }
 
 type User interface {
 	Save() (error)
-	ToJson() (gin.H)
 }
 
-func (model *Model) ToJson() (gin.H)  {
-	return gin.H{
-		"id":         model.Id,
-		"email":      model.Email,
-		"first_name": model.FirstName,
-		"last_name":  model.LastName,
-		"role":       model.Role,
-		"created_at": model.CreatedAt,
-		"updated_at": model.UpdatedAt,
-	}
-}
-
-func initial(data map[string]interface{}) *Model {
-	id            := data["_id"].(primitive.ObjectID).Hex()
-	firstName , _ := data["first_name"].(string)
-	lastName , _  := data["last_name"].(string)
-	email , _     := data["email"].(string)
-	password , _  := data["password"].(string)
-	role , _      := data["role"].(string)
-
-	return &Model{
-		Id: &id,
-		FirstName: firstName,
-		LastName: lastName,
-		Email: email,
-		Password: password,
-		Role: role,
-		CreatedAt: data["created_at"],
-		UpdatedAt: data["updated_at"],
-	}
-}
-
-func Find(query interface{}) (*Model, error) {
-	var result gin.H
-	err := database.Database.Collection("users").FindOne(database.Ctx, query).Decode(&result)
-
-	if err != nil{
-		return nil , err
-	}
-
-	return initial(result) , nil
+func Find(query interface{}) (Model, error) {
+	var result Model
+	err := database.GetAdabter(config.GetDefault()).FindOne("users" , query , &result)
+	return result , err
 }
 
 func (model *Model) Save()  (error){
-	if model.Id == nil{
+	if model.Id == ""{
 		err := saveNewUser(model)
 		return err
 	}else {
@@ -78,34 +39,19 @@ func (model *Model) Save()  (error){
 }
 
 func saveNewUser(model *Model) (error){
-	result , err := database.Database.Collection("users").InsertOne(database.Ctx, model)
+	result , err := database.GetAdabter(config.GetDefault()).InsertOne("users" , model)
 	if err != nil {
 		return err
 	}
 
-	insertedId := result.InsertedID.(primitive.ObjectID).Hex()
-
-	model.Id = &insertedId
+	model.Id = result
 
 	return nil
 }
 
 func updateUser(model *Model) (error){
-	objID, err := primitive.ObjectIDFromHex(*model.Id)
-	if err != nil {
-		return err
-	}
-
-	_, err = database.Database.Collection("users").UpdateOne(
-		database.Ctx,
-		bson.M{"_id": objID},
-		bson.D{
-			{
-				"$set",
-				model,
-			},
-		},
-	)
-
+	err := database.
+		GetAdabter(config.GetDefault()).
+		UpdateOneById("users" , model.Id , model)
 	return err
 }
