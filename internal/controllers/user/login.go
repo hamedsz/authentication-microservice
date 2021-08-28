@@ -10,18 +10,18 @@ import (
 	"net/http"
 )
 
-type loginRequest struct {
+type LoginRequest struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
-type loginResponse struct {
+type LoginResponse struct {
 	Token string      `json:"token"`
 	User  interface{} `json:"user"`
 }
 
 func (controller Controller) Login(c *gin.Context)  {
-	var request loginRequest
+	var request LoginRequest
 	err := c.BindJSON(&request)
 	if err != nil {
 		handler.ValidationErrorHandler(c , err)
@@ -47,7 +47,7 @@ func (controller Controller) Login(c *gin.Context)  {
 
 	token := auth.GetAdabter().GenerateToken(user.Email)
 
-	c.JSON(http.StatusOK , loginResponse{
+	c.JSON(http.StatusOK , LoginResponse{
 		Token: token,
 		User:  user,
 	})
